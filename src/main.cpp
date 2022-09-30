@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 boolean bState;
+boolean bLastState;
 
 void setup() {
   // Set Serial Output Speed
@@ -8,6 +9,7 @@ void setup() {
 
   // set boolean default state
   bState = true;
+  bLastState = false;
   
   // configure pin D4 as a digital output
   pinMode(D4, OUTPUT); 
@@ -26,18 +28,23 @@ void loop() {
   // read digital value from button
   iButton = digitalRead(D5);
 
-  if(iButton == 0) {
-    bState = !bState; // toggle boolean
+  if(iButton == HIGH) { 
+    if(bLastState == false) { // check last state so it doesnt repeat
+      bLastState = true; //set last state to prevent repeat
+      bState = !bState; // toggle boolean
+    }
+  } else {
+    bLastState = false; // unsets last state because button is not pressed
   }
 
   // read digitized value from the D1 Mini's A/D convertor 
   iResistor = analogRead(A0);
 
   if(bState == false) {
-    iResistor = 0; //turn off led
+    digitalWrite(D4, HIGH); //  turn off led
+  } else {
+    analogWrite(D4, iResistor); // set led to resistor val
   }
-
-  analogWrite(D4, iResistor);
 
   delay(1);
 }
